@@ -2,6 +2,7 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 from PIL import Image
+import cv2 as cv
 
 # von Bild zum Bitstream
 im = Image.open("sunflower.png")
@@ -10,21 +11,30 @@ w=im.width  # width of image
 h=im.height  # height of image
 f=im.format   # format of image
 print(w, h, f)
-im2 = im.convert("1")  # zum Schwarz-Weiss Mode umwandeln
+im2 = im.convert("P")  # zum P Mode umwandeln
 print(im2.mode)
 im2.show()
 Bitstream = []
 for i in range(w):
     for k in range(h):
-        Bitstream.append(im2.getpixel((i, k)))  # bekommen bei jedem Punkt 255 fuer Schwarz,0 fuer Weiss
+        Farbe = im2.getpixel((i, k))
+        Farbe_str = ''
+        while Farbe > 0:
+            Farbe_str += str(Farbe % 2)
+            Farbe = Farbe // 2
+        if len(Farbe_str) < 8:
+            for q in range(8-len(Farbe_str)):
+                Farbe_str += str(0)
+        Farbe_str = Farbe_str[::-1]
+        for j in Farbe_str:
+            Bitstream.append(int(j))  # bekommen bei jedem Punkt 255 fuer Schwarz,0 fuer Weiss
         k = k+1
     i = i+1
-for t in range(len(Bitstream)):
-    if Bitstream[t] == 255:  # 255 zum 1 umwandeln
-        Bitstream[t] = 1
+
 print(Bitstream)  # Bitstream List
 bitstream = np.array(Bitstream)
 print(bitstream)    # Bitstream nummpy array
+print(len(bitstream))
 
 # Modulation
 N = len(bitstream)
@@ -142,5 +152,28 @@ plt.show()
 # Bitstream zurueck zum Bild
 QPSK_demo = (QPSK_demo+1)/2
 print(QPSK_demo)
+print(len(QPSK_demo))
+QPSK_demo = list(QPSK_demo)
+for i in range(1, len(QPSK_demo)+1):
+    QPSK_demo[i-1] = int(QPSK_demo[i-1])
+print(QPSK_demo)
+
+QPSK_Farbe = []
+for i in range(1, int(N/8 + 1)):
+    temp = ''
+    for j in QPSK_demo[(i-1)*8:(i*8-1)]:
+        temp += str(j)
+    Farbe = int(temp, 2)
+    QPSK_Farbe.append(Farbe)
+for i in range(1, len(QPSK_Farbe)+1):
+    QPSK_Farbe[i-1] = QPSK_Farbe[i-1]*2
+QPSK_Farbe = np.array(QPSK_Farbe)
+print(QPSK_Farbe)
+print(len(QPSK_Farbe))
 
 
+
+"""
+cv.imshow("vom Bitstream umgewandeltes Bild", QPSK_demo.reshape(160, 80))
+cv.waitKey(0)
+"""
