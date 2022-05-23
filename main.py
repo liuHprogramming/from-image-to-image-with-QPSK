@@ -6,25 +6,25 @@ from PIL import Image
 # von Bild zum Bitstream
 im = Image.open("sunflower.png")
 im.show()
-w=im.width
-h=im.height
-f=im.format
+w=im.width  # width of image
+h=im.height  # height of image
+f=im.format   # format of image
 print(w, h, f)
-im2 = im.convert("1")
+im2 = im.convert("1")  # zum Schwarz-Weiss Mode umwandeln
 print(im2.mode)
 im2.show()
 Bitstream = []
 for i in range(w):
     for k in range(h):
-        Bitstream.append(im2.getpixel((i, k)))
+        Bitstream.append(im2.getpixel((i, k)))  # bekommen bei jedem Punkt 255 fuer Schwarz,0 fuer Weiss
         k = k+1
     i = i+1
 for t in range(len(Bitstream)):
-    if Bitstream[t] == 255:
+    if Bitstream[t] == 255:  # 255 zum 1 umwandeln
         Bitstream[t] = 1
-print(Bitstream)
+print(Bitstream)  # Bitstream List
 bitstream = np.array(Bitstream)
-print(bitstream)
+print(bitstream)    # Bitstream nummpy array
 
 # Modulation
 N = len(bitstream)
@@ -84,13 +84,63 @@ plt.plot(t, QPSK_signal[40:140])
 plt.legend(["QPSK-signal"], loc='upper right')
 plt.show()
 
+# Funktion fuer additive white gassian noise im Channel
+def awgn(x, snr):
+    snr = 10 ** (snr/10)
+    xpower = np.sum(x**2)/len(x)
+    npower = xpower/snr
+    noise = np.random.randn(len(x))  # 1*len(x) array with standord normal distribution
+    return noise*np.sqrt(npower) + x
 
+snr=1
+QPSK_channel = awgn(QPSK_signal, snr)  # Addieren white gassian Noise im Channel
 
+# demodulation
+I_demo = np.array([])
+Q_demo = np.array([])
+for i in range(1, int(N/2)+1):
+    I_ausgabe = QPSK_channel[(i-1)*len(bit_t):i*len(bit_t)]*np.cos(2*np.pi*fc*bit_t)
+    if np.sum(I_ausgabe) > 0:
+        I_demo = np.insert(I_demo, len(I_demo), 1)
+    else:
+        I_demo = np.insert(I_demo, len(I_demo), -1)
 
+    Q_ausgabe = QPSK_channel[(i-1)*len(bit_t):i*len(bit_t)]*np.cos(2*np.pi*fc*bit_t+np.pi/2)
+    if np.sum(Q_ausgabe) > 0:
+        Q_demo = np.insert(Q_demo, len(Q_demo), 1)
+    else:
+        Q_demo = np.insert(Q_demo, len(Q_demo), -1)
 
+QPSK_demo = np.array([])
+for i in range(1, N+1):
+    if np.mod(i, 2) != 0:
+        QPSK_demo = np.insert(QPSK_demo, len(QPSK_demo), I_demo[int((i-1)/2)])
+    else:
+        QPSK_demo = np.insert(QPSK_demo, len(QPSK_demo), Q_demo[int((i/2)-1)])
 
+QPSK_recover = np.array([])
+for i in range(1, N+1):
+    QPSK_recover = np.insert(QPSK_recover,len(QPSK_recover), QPSK_demo[i-1]*np.ones(T*Fs))
+I_recover = np.array([])
+Q_recover = np.array([])
+for i in range(1, int(N/2)+1):
+    I_recover = np.insert(I_recover, len(I_recover), I_demo[i-1]*np.ones(2*T*Fs))
+    Q_recover = np.insert(Q_recover, len(Q_recover), Q_demo[i-1]*np.ones(2*T*Fs))
 
+# Zeichen des I,Q und gesamten Bitstream (mit Rechteck Signal falten) nach der Modulation
+plt.subplot(3, 1, 1)
+plt.plot(t, QPSK_recover[40:140])
+plt.legend(["Bitstream"], loc='upper right')
+plt.subplot(3, 1, 2)
+plt.plot(t, I_recover[40:140])
+plt.legend(["I_Bitstream"], loc='upper right')
+plt.subplot(3, 1, 3)
+plt.plot(t, Q_recover[40:140])
+plt.legend(["Q_Bitstream"], loc='upper right')
+plt.show()
 
-
+# Bitstream zurueck zum Bild
+QPSK_demo = (QPSK_demo+1)/2
+print(QPSK_demo)
 
 
