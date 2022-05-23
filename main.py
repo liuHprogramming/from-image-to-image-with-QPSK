@@ -171,9 +171,9 @@ QPSK_Farbe = np.array(QPSK_Farbe)
 print(QPSK_Farbe)
 print(len(QPSK_Farbe))
 
+QPSK_Farbe = QPSK_Farbe.reshape(40, 40)
+print(QPSK_Farbe)
+plt.imshow(QPSK_Farbe, cmap="RdBu")
+plt.show()
 
 
-"""
-cv.imshow("vom Bitstream umgewandeltes Bild", QPSK_demo.reshape(160, 80))
-cv.waitKey(0)
-"""
