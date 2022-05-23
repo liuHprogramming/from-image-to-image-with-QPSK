@@ -165,6 +165,9 @@ for i in range(1, int(N/8 + 1)):
         temp += str(j)
     Farbe = int(temp, 2)
     QPSK_Farbe.append(Farbe)
+for i in range(1, len(QPSK_Farbe)+1):
+    QPSK_Farbe[i-1] = QPSK_Farbe[i-1]*2
+
 QPSK_Farbe = np.array(QPSK_Farbe)
 print(QPSK_Farbe)
 print(len(QPSK_Farbe))
