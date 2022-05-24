@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import cv2 as cv
 
+# Schritt 1
 # von Bild zum Bitstream
 im = Image.open("sunflower.png")
 im.show()
@@ -74,6 +75,7 @@ plt.plot(t, Q_data[40:140])
 plt.legend(["Q_Bistream"], loc='upper right')
 plt.show()
 
+# Schritt 2
 # Modulation
 # I,Q Bitstream-Signal zum Modulation-QPSK Signal(sinus/cos-formig signal,durch Summe der I und Q Signal)
 bit_t = np.array([])
@@ -100,6 +102,7 @@ plt.plot(t, QPSK_signal[40:140])
 plt.legend(["QPSK-signal"], loc='upper right')
 plt.show()
 
+# Schritt 3
 # Channel
 # Funktion fuer additive white gassian noise im Channel
 def awgn(x, snr):
@@ -112,6 +115,7 @@ def awgn(x, snr):
 snr=1
 QPSK_channel = awgn(QPSK_signal, snr)  # Addieren white gassian Noise im Channel
 
+# Schritt 4
 # demodulation
 I_demo = np.array([])
 Q_demo = np.array([])
@@ -161,8 +165,9 @@ plt.plot(t, Q_recover[40:140])
 plt.legend(["Q_Bitstream"], loc='upper right')
 plt.show()
 
+# Schritt 5
 # Bitstream zurueck zum Bild
-QPSK_demo = (QPSK_demo+1)/2
+QPSK_demo = (QPSK_demo+1)/2  # -1 -> 0, 1 -> 1
 print(QPSK_demo)
 print(len(QPSK_demo))
 QPSK_demo = list(QPSK_demo)
@@ -170,6 +175,7 @@ for i in range(1, len(QPSK_demo)+1):
     QPSK_demo[i-1] = int(QPSK_demo[i-1])
 print(QPSK_demo)
 
+# 8 Bits zurueck zu einen int Farbwert umwandeln , z.B. 10001000 -> 136
 QPSK_Farbe = []
 for i in range(1, int(N/8 + 1)):
     temp = ''
@@ -185,10 +191,11 @@ print(QPSK_Farbe)
 print(len(QPSK_Farbe))
 
 # Bild zeichnen
-QPSK_Farbe = QPSK_Farbe.reshape(40, 40)
+QPSK_Farbe = QPSK_Farbe.reshape(40, 40)  # in einem 40*40 Matrix umwandeln
 print(QPSK_Farbe)
+# Bild zeichnen, Farbwert zwischen 2 - 45, colorbar=yellow-orange-red
 plt.imshow(QPSK_Farbe, origin='lower', vmax=45, vmin=2, cmap="YlOrRd")
-plt.colorbar(label='value of color')
+plt.colorbar(label='value of color')  # colorbar und label im Bild zeigen
 plt.show()
 
 
