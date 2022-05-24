@@ -187,7 +187,7 @@ print(len(QPSK_Farbe))
 # Bild zeichnen
 QPSK_Farbe = QPSK_Farbe.reshape(40, 40)
 print(QPSK_Farbe)
-plt.imshow(QPSK_Farbe, cmap="RdBu")
+plt.imshow(QPSK_Farbe, origin='lower', vmax=45, vmin=2, cmap="YlOrRd")
 plt.colorbar(label='value of color')
 plt.show()
 
